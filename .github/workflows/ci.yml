@@ -27,6 +27,29 @@ jobs:
         uses: asdf-vm/actions/plugin-test@v3
         with:
           command: ruby -v
+  test-binary:
+    needs: [lint]
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test plugin (ruby-builder)
+        uses: asdf-vm/actions/plugin-test@v3
+        env:
+          RUBY_INSTALL_BINARY: ruby-builder
+        with:
+          command: ruby -v
+      - name: Test plugin (rvm)
+        uses: asdf-vm/actions/plugin-test@v3
+        env:
+          RUBY_INSTALL_BINARY: rvm
+        with:
+          command: ruby -v
+          version: 3.2.3
 
   lint:
     runs-on: ubuntu-latest
