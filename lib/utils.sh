@@ -187,5 +187,6 @@ fix_scripts_from_binary() {
   local kernel="$1"
   local install_path="$2"
 
-  find "$install_path/bin" -type f -perm 755 -exec $(run_sed_inplace "$kernel") -e "1s:#!.*:#!$install_path/bin/ruby:" {} \;
+  # shellcheck disable=SC2014,SC2046
+  find "$install_path/bin" -type f -perm 755 -exec $(sed_inplace_cmd "$kernel") -e "1s:#!.*:#!$install_path/bin/ruby:" {} \;
 }
