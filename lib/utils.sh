@@ -173,3 +173,19 @@ fix_runpath() {
     ;;
   esac
 }
+
+sed_inplace_cmd() {
+  local kernel="$1"
+  shift
+  case "$kernel" in
+  Darwin) echo 'sed -i ""' ;;
+  Linux) echo 'sed -i' ;;
+  esac
+}
+
+fix_scripts_from_binary() {
+  local kernel="$1"
+  local install_path="$2"
+
+  find "$install_path/bin" -type f -perm 755 -exec $(run_sed_inplace "$kernel") -e "1s:#!.*:#!$install_path/bin/ruby:" {} \;
+}

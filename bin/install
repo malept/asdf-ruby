@@ -80,6 +80,7 @@ install_ruby_binary() {
 
     download_and_install_prebuilt_ruby "https://github.com/ruby/ruby-builder/releases/download/toolcache" "$filename" "$install_path"
     fix_runpath "$kernel" "$install_path"
+    fix_scripts_from_binary "$kernel" "$install_path"
     ;;
   esac
 }
