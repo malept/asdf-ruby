@@ -38,12 +38,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - name: Test plugin (ruby-builder)
+      - name: Test plugin (travis)
         uses: asdf-vm/actions/plugin-test@v3
         env:
-          RUBY_INSTALL_BINARY: ruby-builder
+          RUBY_INSTALL_BINARY: travis
         with:
           command: ruby -v
+          version: 3.3.5
       - name: Test plugin (rvm)
         uses: asdf-vm/actions/plugin-test@v3
         env:

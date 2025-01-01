@@ -52,35 +52,17 @@ install_ruby_binary() {
   version="$1"
   install_path="$2"
   binary_type="$3"
+  # The binaries from ruby/ruby-builder (used in GitHub Actions) have
+  # hardcoded require paths, so they are not supported directly.
   case "$binary_type" in
-  rvm) # rvm.io/binaries
+  rvm) # https://rvm.io/binaries
     download_and_install_prebuilt_ruby "$(get_rvm_io_url)" "ruby-$version.tar.bz2" "$install_path"
     ;;
-  *) # default to ruby/ruby-builder
-    local filename kernel
-    kernel="$(uname -s)"
-
-    case "$kernel" in
-    Darwin)
-      # filename="ruby-$version-macos-latest.tar.gz"
-      errorexit "OS '$kernel' not supported by asdf-ruby, build from source instead"
-      ;;
-    Linux)
-      local os_version
-      load_os_release
-      if [[ "${ID:-}" != "ubuntu" ]]; then
-        errorexit "Ubuntu is the only Linux distro supported by ruby/ruby-builder, build from source instead"
-      fi
-      os_version="${VERSION_ID:-UNDEFINED_BY_OS_RELEASE}"
-      ensure_patchelf_installed
-      filename="ruby-$version-ubuntu-$os_version.tar.gz"
-      ;;
-    *) errorexit "OS '$kernel' not supported by ruby/ruby-builder, build from source instead" ;;
-    esac
-
-    download_and_install_prebuilt_ruby "https://github.com/ruby/ruby-builder/releases/download/toolcache" "$filename" "$install_path"
-    fix_runpath "$kernel" "$install_path"
-    fix_scripts_from_binary "$kernel" "$install_path"
+  travis) # https://rubies.travis-ci.org/
+    download_and_install_prebuilt_ruby "$(get_travis_rubies_url)" "ruby-$version.tar.bz2" "$install_path"
+    ;;
+  *)
+    errorexit "Unknown binary type, specify either 'rvm' or 'travis'"
     ;;
   esac
 }

@@ -133,6 +133,17 @@ get_rvm_io_url() {
   esac
 }
 
+get_travis_rubies_url() {
+  if [[ "$(uname -s)" != "Linux" ]]; then
+    errorexit "macOS currently unsupported, install from source instead"
+  fi
+  load_os_release
+  if [[ "$ID" != "ubuntu" ]]; then
+    errorexit "Travis CI only provides Linux binaries for the Ubuntu distro"
+  fi
+  echo "https://s3.amazonaws.com/travis-rubies/binaries/$ID/${VERSION_ID:-UNDEFINED_BY_OS_RELEASE}/$(uname -m)"
+}
+
 run_gnu_tar() {
   local tar
   case "$(uname -s)" in
