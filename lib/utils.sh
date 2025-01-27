@@ -128,7 +128,6 @@ get_rvm_io_base_url() {
     distro="$(get_rvm_io_linux_distro "$ID")"
     echo "https://rvm.io/binaries/$distro/${VERSION_ID:-UNDEFINED_BY_OS_RELEASE}/$(uname -m)"
     ;;
-
   *) errorexit "OS '$kernel' not supported by rvm.io/binaries, install from source instead" ;;
   esac
 }
@@ -168,14 +167,17 @@ run_gnu_tar() {
 download_and_install_prebuilt_ruby() {
   local base_url download_file filename install_path url
   base_url="$1"
-  filename="$2"
-  install_path="$3"
+  shift
+  filename="$1"
+  shift
+  install_path="$1"
+  shift
   url="$base_url/$filename"
   download_file="$(mktemp -d "${TMPDIR:-/tmp}/asdf-ruby.XXXXXX")/$filename"
 
   curl --fail --silent --show-error --location --output "$download_file" "$url"
   mkdir -p "$install_path"
-  run_gnu_tar --strip-components=1 --extract --file="$download_file" --directory="$install_path" --preserve-permissions
+  run_gnu_tar --extract --file="$download_file" --directory="$install_path" --preserve-permissions "$@"
 }
 
 fix_runpath() {

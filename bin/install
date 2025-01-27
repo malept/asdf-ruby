@@ -56,10 +56,10 @@ install_ruby_binary() {
   # hardcoded require paths, so they are not supported directly.
   case "$binary_type" in
   rvm) # https://rvm.io/binaries
-    download_and_install_prebuilt_ruby "$(get_rvm_io_base_url)" "ruby-$version.tar.bz2" "$install_path"
+    download_and_install_prebuilt_ruby "$(get_rvm_io_base_url)" "ruby-$version.tar.bz2" "$install_path" --strip-components=1
     ;;
   travis) # https://rubies.travis-ci.org/
-    download_and_install_prebuilt_ruby "$(get_travis_rubies_base_url)" "ruby-$version.tar.bz2" "$install_path"
+    download_and_install_prebuilt_ruby "$(get_travis_rubies_base_url)" "ruby-$version.tar.bz2" "$install_path" --strip-components=1
     ;;
   *) # Custom URL
     local base_url filename url
