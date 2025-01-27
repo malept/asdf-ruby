@@ -113,7 +113,7 @@ get_rvm_io_linux_distro() {
   echo "$distro_slug"
 }
 
-get_rvm_io_url() {
+get_rvm_io_base_url() {
   local kernel
   kernel="$(uname -s)"
   case "$kernel" in
@@ -133,7 +133,7 @@ get_rvm_io_url() {
   esac
 }
 
-get_travis_rubies_url() {
+get_travis_rubies_base_url() {
   if [[ "$(uname -s)" != "Linux" ]]; then
     errorexit "Non-Linux OSes currently unsupported, install from source instead"
   fi
@@ -142,6 +142,17 @@ get_travis_rubies_url() {
     errorexit "Travis CI only provides Linux binaries for the Ubuntu distro"
   fi
   echo "https://s3.amazonaws.com/travis-rubies/binaries/$ID/${VERSION_ID:-UNDEFINED_BY_OS_RELEASE}/$(uname -m)"
+}
+
+# Replace {...} placeholders with appropriate values
+render_custom_url() {
+  local url_template="$1"
+  local ruby_version="$2"
+  load_os_release
+  echo "$url_template" | sed \
+    -e "s:{distro}:$ID:g" \
+    -e "s:{distro_version}:$VERSION_ID:g" \
+    -e "s:{ruby_version}:$ruby_version:g"
 }
 
 run_gnu_tar() {
