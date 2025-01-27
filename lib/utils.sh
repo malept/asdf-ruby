@@ -135,7 +135,7 @@ get_rvm_io_url() {
 
 get_travis_rubies_url() {
   if [[ "$(uname -s)" != "Linux" ]]; then
-    errorexit "macOS currently unsupported, install from source instead"
+    errorexit "Non-Linux OSes currently unsupported, install from source instead"
   fi
   load_os_release
   if [[ "$ID" != "ubuntu" ]]; then
