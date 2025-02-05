@@ -48,40 +48,32 @@ install_ruby() {
 }
 
 install_ruby_binary() {
-  local binary_type install_path version
+  local base_url binary_type filename install_path tar_args version
   version="$1"
   install_path="$2"
   binary_type="$3"
+  tar_args=""
+  # The binaries from ruby/ruby-builder (used in GitHub Actions) have
+  # hardcoded require paths, so they are not supported directly.
   case "$binary_type" in
-  rvm) # rvm.io/binaries
-    download_and_install_prebuilt_ruby "$(get_rvm_io_url)" "ruby-$version.tar.bz2" "$install_path"
+  rvm) # https://rvm.io/binaries
+    base_url="$(get_rvm_io_base_url)"
+    filename="ruby-$version.tar.bz2"
+    tar_args="--strip-components=1"
     ;;
-  *) # default to ruby/ruby-builder
-    local filename kernel
-    kernel="$(uname -s)"
-
-    case "$kernel" in
-    Darwin)
-      # filename="ruby-$version-macos-latest.tar.gz"
-      errorexit "OS '$kernel' not supported by asdf-ruby, build from source instead"
-      ;;
-    Linux)
-      local os_version
-      load_os_release
-      if [[ "${ID:-}" != "ubuntu" ]]; then
-        errorexit "Ubuntu is the only Linux distro supported by ruby/ruby-builder, build from source instead"
-      fi
-      os_version="${VERSION_ID:-UNDEFINED_BY_OS_RELEASE}"
-      ensure_patchelf_installed
-      filename="ruby-$version-ubuntu-$os_version.tar.gz"
-      ;;
-    *) errorexit "OS '$kernel' not supported by ruby/ruby-builder, build from source instead" ;;
-    esac
-
-    download_and_install_prebuilt_ruby "https://github.com/ruby/ruby-builder/releases/download/toolcache" "$filename" "$install_path"
-    fix_runpath "$kernel" "$install_path"
+  travis) # https://rubies.travis-ci.org/
+    base_url="$(get_travis_rubies_base_url)"
+    filename="ruby-$version.tar.bz2"
+    tar_args="--strip-components=1"
+    ;;
+  *) # Custom URL
+    local url
+    url="$(render_custom_url "$binary_type" "$version")"
+    base_url="$(dirname "$url")"
+    filename="$(basename "$url")"
     ;;
   esac
+  download_and_install_prebuilt_ruby "$base_url" "$filename" "$install_path" "$tar_args"
 }
 
 is_version_valid() {

@@ -113,7 +113,7 @@ get_rvm_io_linux_distro() {
   echo "$distro_slug"
 }
 
-get_rvm_io_url() {
+get_rvm_io_base_url() {
   local kernel
   kernel="$(uname -s)"
   case "$kernel" in
@@ -128,9 +128,37 @@ get_rvm_io_url() {
     distro="$(get_rvm_io_linux_distro "$ID")"
     echo "https://rvm.io/binaries/$distro/${VERSION_ID:-UNDEFINED_BY_OS_RELEASE}/$(uname -m)"
     ;;
-
   *) errorexit "OS '$kernel' not supported by rvm.io/binaries, install from source instead" ;;
   esac
+}
+
+get_travis_rubies_base_url() {
+  if [[ "$(uname -s)" != "Linux" ]]; then
+    errorexit "Non-Linux OSes currently unsupported, install from source instead"
+  fi
+  load_os_release
+  if [[ "$ID" != "ubuntu" ]]; then
+    errorexit "Travis CI only provides Linux binaries for the Ubuntu distro"
+  fi
+  echo "https://s3.amazonaws.com/travis-rubies/binaries/$ID/${VERSION_ID:-UNDEFINED_BY_OS_RELEASE}/$(uname -m)"
+}
+
+# Replace {...} placeholders with appropriate values
+render_custom_url() {
+  local url_template="$1"
+  local ruby_version="$2"
+  local os arch
+  os="$(uname -s | awk '{print tolower($0)}')"
+  arch="$(uname -m)"
+  if [[ "$os" == "linux" ]]; then
+    load_os_release
+  fi
+  echo "$url_template" | sed \
+    -e "s:{distro}:${ID:-none}:g" \
+    -e "s:{distro_version}:${VERSION_ID:-none}:g" \
+    -e "s:{os}:$os:g" \
+    -e "s:{arch}:$arch:g" \
+    -e "s:{ruby_version}:$ruby_version:g"
 }
 
 run_gnu_tar() {
@@ -146,30 +174,15 @@ run_gnu_tar() {
 download_and_install_prebuilt_ruby() {
   local base_url download_file filename install_path url
   base_url="$1"
-  filename="$2"
-  install_path="$3"
+  shift
+  filename="$1"
+  shift
+  install_path="$1"
+  shift
   url="$base_url/$filename"
   download_file="$(mktemp -d "${TMPDIR:-/tmp}/asdf-ruby.XXXXXX")/$filename"
 
   curl --fail --silent --show-error --location --output "$download_file" "$url"
   mkdir -p "$install_path"
-  run_gnu_tar --strip-components=1 --extract --file="$download_file" --directory="$install_path" --preserve-permissions
-}
-
-fix_runpath() {
-  local kernel="$1"
-  local install_path="$2"
-  case "$kernel" in
-  Linux)
-    # shellcheck disable=SC2016
-    patchelf --set-rpath '${ORIGIN}/../lib' "$install_path/bin/ruby"
-    # shellcheck disable=SC2016
-    find "$install_path" -type f -name "*.so" -exec patchelf --set-rpath '${ORIGIN}/../lib' "{}" \;
-    ;;
-  Darwin)
-    # TODO: run install_name_tool on the ruby executable plus any libraries (*.bundle?)
-    # to change the rpath of libruby*.dylib to @loader_path/../lib/libruby*.dylib
-    errorexit "fix_runpath not implemented for macOS"
-    ;;
-  esac
+  run_gnu_tar --extract --file="$download_file" --directory="$install_path" --preserve-permissions "$@"
 }
