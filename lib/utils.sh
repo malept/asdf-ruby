@@ -156,7 +156,7 @@ render_custom_url() {
   echo "$url_template" | sed \
     -e "s:{distro}:${ID:-none}:g" \
     -e "s:{distro_version}:${VERSION_ID:-none}:g" \
-    -e "s:{os}:${os,,}:g" \
+    -e "s:{os}:$os:g" \
     -e "s:{arch}:$arch:g" \
     -e "s:{ruby_version}:$ruby_version:g"
 }
