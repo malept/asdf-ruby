@@ -28,14 +28,9 @@ jobs:
         uses: asdf-vm/actions/plugin-test@v3
         with:
           command: ruby -v
-  test-binary:
+  test-binary-linux:
     needs: [lint]
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-22.04
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Test plugin (travis)
@@ -59,6 +54,18 @@ jobs:
         with:
           command: ruby -v
           version: 3.1.6
+  test-binary-macos:
+    needs: [lint]
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test plugin (custom)
+        uses: asdf-vm/actions/plugin-test@v3
+        env:
+          RUBY_INSTALL_BINARY: https://github.com/malept/ruby-builder/releases/download/binaries/ruby-{ruby_version}_{os}-{arch}_{distro}-{distro_version}.tar.xz
+        with:
+          command: ruby -v
+          version: 3.2.6
 
   lint:
     runs-on: ubuntu-latest
