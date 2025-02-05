@@ -148,9 +148,11 @@ render_custom_url() {
   local url_template="$1"
   local ruby_version="$2"
   local os arch
-  os="$(uname -s)"
+  os="$(uname -s | awk '{print tolower($0)}')"
   arch="$(uname -m)"
-  load_os_release
+  if [[ "$os" == "linux" ]]; then
+    load_os_release
+  fi
   echo "$url_template" | sed \
     -e "s:{distro}:${ID:-none}:g" \
     -e "s:{distro_version}:${VERSION_ID:-none}:g" \
