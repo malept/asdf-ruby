@@ -147,10 +147,15 @@ get_travis_rubies_base_url() {
 render_custom_url() {
   local url_template="$1"
   local ruby_version="$2"
+  local os arch
+  os="$(uname -s)"
+  arch="$(uname -m)"
   load_os_release
   echo "$url_template" | sed \
-    -e "s:{distro}:$ID:g" \
-    -e "s:{distro_version}:$VERSION_ID:g" \
+    -e "s:{distro}:${ID:-none}:g" \
+    -e "s:{distro_version}:${VERSION_ID:-none}:g" \
+    -e "s:{os}:${os,,}:g" \
+    -e "s:{arch}:$arch:g" \
     -e "s:{ruby_version}:$ruby_version:g"
 }
 
