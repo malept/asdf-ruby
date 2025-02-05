@@ -186,38 +186,3 @@ download_and_install_prebuilt_ruby() {
   mkdir -p "$install_path"
   run_gnu_tar --extract --file="$download_file" --directory="$install_path" --preserve-permissions "$@"
 }
-
-fix_runpath() {
-  local kernel="$1"
-  local install_path="$2"
-  case "$kernel" in
-  Linux)
-    # shellcheck disable=SC2016
-    patchelf --set-rpath '${ORIGIN}/../lib' "$install_path/bin/ruby"
-    # shellcheck disable=SC2016
-    find "$install_path" -type f -name "*.so" -exec patchelf --set-rpath '${ORIGIN}/../lib' "{}" \;
-    ;;
-  Darwin)
-    # TODO: run install_name_tool on the ruby executable plus any libraries (*.bundle?)
-    # to change the rpath of libruby*.dylib to @loader_path/../lib/libruby*.dylib
-    errorexit "fix_runpath not implemented for macOS"
-    ;;
-  esac
-}
-
-sed_inplace_cmd() {
-  local kernel="$1"
-  shift
-  case "$kernel" in
-  Darwin) echo 'sed -i ""' ;;
-  Linux) echo 'sed -i' ;;
-  esac
-}
-
-fix_scripts_from_binary() {
-  local kernel="$1"
-  local install_path="$2"
-
-  # shellcheck disable=SC2014,SC2046
-  find "$install_path/bin" -type f -perm 755 -exec $(sed_inplace_cmd "$kernel") -e "1s:#!.*:#!$install_path/bin/ruby:" {} \;
-}
