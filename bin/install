@@ -48,27 +48,32 @@ install_ruby() {
 }
 
 install_ruby_binary() {
-  local binary_type install_path version
+  local base_url binary_type filename install_path tar_args version
   version="$1"
   install_path="$2"
   binary_type="$3"
+  tar_args=""
   # The binaries from ruby/ruby-builder (used in GitHub Actions) have
   # hardcoded require paths, so they are not supported directly.
   case "$binary_type" in
   rvm) # https://rvm.io/binaries
-    download_and_install_prebuilt_ruby "$(get_rvm_io_base_url)" "ruby-$version.tar.bz2" "$install_path" --strip-components=1
+    base_url="$(get_rvm_io_base_url)"
+    filename="ruby-$version.tar.bz2"
+    tar_args="--strip-components=1"
     ;;
   travis) # https://rubies.travis-ci.org/
-    download_and_install_prebuilt_ruby "$(get_travis_rubies_base_url)" "ruby-$version.tar.bz2" "$install_path" --strip-components=1
+    base_url="$(get_travis_rubies_base_url)"
+    filename="ruby-$version.tar.bz2"
+    tar_args="--strip-components=1"
     ;;
   *) # Custom URL
-    local base_url filename url
+    local url
     url="$(render_custom_url "$binary_type" "$version")"
     base_url="$(dirname "$url")"
     filename="$(basename "$url")"
-    download_and_install_prebuilt_ruby "$base_url" "$filename" "$install_path"
     ;;
   esac
+  download_and_install_prebuilt_ruby "$base_url" "$filename" "$install_path" "$tar_args"
 }
 
 is_version_valid() {
