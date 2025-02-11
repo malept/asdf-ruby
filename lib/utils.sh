@@ -77,12 +77,6 @@ ruby_build_path() {
   echo "$(ruby_build_dir)/bin/ruby-build"
 }
 
-ensure_patchelf_installed() {
-  if ! command -v patchelf >/dev/null; then
-    errorexit "Run 'sudo apt install patchelf' to install Ruby binaries from ruby/ruby-builder"
-  fi
-}
-
 load_os_release() {
   local os_release
 
