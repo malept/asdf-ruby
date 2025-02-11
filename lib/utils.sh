@@ -86,13 +86,49 @@ load_os_release() {
   source "${os_release}"
 }
 
+get_os() {
+  local os="${RUBY_BINARY_INSTALL_OS:-}"
+  if [[ -z $os ]]; then
+    os="$(uname -s | awk '{print tolower($0)}')"
+  fi
+
+  echo "$os"
+}
+
+get_arch() {
+  local arch="${RUBY_BINARY_INSTALL_ARCH:-}"
+  if [[ -z $arch ]]; then
+    arch="$(uname -m)"
+  fi
+
+  echo "$arch"
+}
+
+get_linux_distro() {
+  local distro="${RUBY_BINARY_INSTALL_DISTRO:-}"
+  if [[ -z $distro ]]; then
+    distro="${1:-none}"
+  fi
+
+  echo "$distro"
+}
+
+get_linux_distro_version() {
+  local distro_version="${RUBY_BINARY_INSTALL_DISTRO_VERSION:-}"
+  if [[ -z $distro_version ]]; then
+    distro_version="${1:-none}"
+  fi
+
+  echo "$distro_version"
+}
+
 get_rvm_io_linux_distro() {
   local distro_slug distro_id
 
   distro_id="$1"
 
-  if [[ -n "${RUBY_INSTALL_BINARY_RVM_DISTRO:-}" ]]; then
-    echo "$RUBY_INSTALL_BINARY_RVM_DISTRO"
+  if [[ -n "${RUBY_BINARY_INSTALL_DISTRO:-}" ]]; then
+    echo "$RUBY_BINARY_INSTALL_DISTRO"
     return
   fi
 
@@ -108,57 +144,56 @@ get_rvm_io_linux_distro() {
 }
 
 get_rvm_io_base_url() {
-  local kernel
-  kernel="$(uname -s)"
-  case "$kernel" in
-  Darwin)
+  local os
+  os="$(get_os)"
+  case "$os" in
+  darwin)
     # There is an osx folder but the binaries haven't been built since 2015
     errorexit "macOS not supported by rvm.io/binaries, install from source instead"
     ;;
 
-  Linux)
-    local distro
+  linux)
     load_os_release
-    distro="$(get_rvm_io_linux_distro "$ID")"
-    echo "https://rvm.io/binaries/$distro/${VERSION_ID:-UNDEFINED_BY_OS_RELEASE}/$(uname -m)"
+    echo "https://rvm.io/binaries/$(get_rvm_io_linux_distro "$ID")/$(get_linux_distro_version "$VERSION_ID")/$(get_arch)"
     ;;
-  *) errorexit "OS '$kernel' not supported by rvm.io/binaries, install from source instead" ;;
+  *) errorexit "OS '$os' not supported by rvm.io/binaries, install from source instead" ;;
   esac
 }
 
 get_travis_rubies_base_url() {
-  if [[ "$(uname -s)" != "Linux" ]]; then
+  local distro
+  if [[ "$(get_os)" != "linux" ]]; then
     errorexit "Non-Linux OSes currently unsupported, install from source instead"
   fi
   load_os_release
-  if [[ "$ID" != "ubuntu" ]]; then
+  distro="$(get_linux_distro "$ID")"
+  if [[ "$distro" != "ubuntu" ]]; then
     errorexit "Travis CI only provides Linux binaries for the Ubuntu distro"
   fi
-  echo "https://s3.amazonaws.com/travis-rubies/binaries/$ID/${VERSION_ID:-UNDEFINED_BY_OS_RELEASE}/$(uname -m)"
+  echo "https://s3.amazonaws.com/travis-rubies/binaries/$distro/$(get_linux_distro_version "$VERSION_ID")/$(get_arch)"
 }
 
 # Replace {...} placeholders with appropriate values
 render_custom_url() {
   local url_template="$1"
   local ruby_version="$2"
-  local os arch
-  os="$(uname -s | awk '{print tolower($0)}')"
-  arch="$(uname -m)"
+  local os
+  os="$(get_os)"
   if [[ "$os" == "linux" ]]; then
     load_os_release
   fi
   echo "$url_template" | sed \
-    -e "s:{distro}:${ID:-none}:g" \
-    -e "s:{distro_version}:${VERSION_ID:-none}:g" \
+    -e "s:{distro}:$(get_linux_distro "$ID"):g" \
+    -e "s:{distro_version}:$(get_linux_distro_version "$VERSION_ID"):g" \
     -e "s:{os}:$os:g" \
-    -e "s:{arch}:$arch:g" \
+    -e "s:{arch}:$(get_arch):g" \
     -e "s:{ruby_version}:$ruby_version:g"
 }
 
 run_gnu_tar() {
   local tar
-  case "$(uname -s)" in
-  Darwin) tar=gtar ;;
+  case "$(get_os)" in
+  darwin) tar=gtar ;;
   *) tar=tar ;;
   esac
 

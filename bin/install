@@ -10,8 +10,8 @@ install_ruby() {
   local version="$2"
   local install_path="$3"
 
-  if [[ -n "${RUBY_INSTALL_BINARY:-}" ]]; then
-    install_ruby_binary "$version" "$install_path" "$RUBY_INSTALL_BINARY"
+  if [[ -n "${RUBY_BINARY_INSTALL:-}" ]]; then
+    install_ruby_binary "$version" "$install_path" "$RUBY_BINARY_INSTALL"
     return
   fi
 
@@ -71,6 +71,7 @@ install_ruby_binary() {
     url="$(render_custom_url "$binary_type" "$version")"
     base_url="$(dirname "$url")"
     filename="$(basename "$url")"
+    tar_args="$RUBY_BINARY_INSTALL_TAR_ARGS"
     ;;
   esac
   download_and_install_prebuilt_ruby "$base_url" "$filename" "$install_path" "$tar_args"

@@ -36,6 +36,47 @@ By default asdf-ruby uses a recent release of ruby-build, however instead you ca
 ASDF_RUBY_BUILD_VERSION=master asdf install ruby 2.6.4
 ```
 
+### Installing binaries
+
+If `RUBY_BINARY_INSTALL` is set, `asdf-ruby` will install a binary distribution of Ruby from the specified source, as determined by the value of the environment variable. The following valid values are:
+
+* `rvm`
+* `travis`
+* Custom (templated URL)
+
+The following extra tools are required for this functionality:
+
+* `uname`
+* GNU tar
+
+On macOS, GNU tar can be installed via Homebrew:
+
+```shell
+brew install gnu-tar
+```
+
+#### `rvm`
+
+Installs one of the Ruby binaries provided by RVM via `rvm.io/binaries`. Note that only Linux is supported, and only certain Linux distros and Ruby versions.
+
+The Linux distribution name and version is determined via the [operating system identification standard](https://www.linux.org/docs/man5/os-release.html). To override these values, you can use the `RUBY_BINARY_INSTALL_DISTRO` and `RUBY_BINARY_INSTALL_DISTRO_VERSION` environment variables, respectively.
+
+#### `travis`
+
+Installs one of the Ruby binaries provided by Travis CI via `rubies.travis-ci.org`. Note that only Ubuntu Linux is supported, and only certain Ruby versions are supported for certain Ubuntu versions.
+
+#### Custom
+
+Installs a Ruby binary using the provided templated URL. Valid template values:
+
+* `{ruby_version}` - the version of Ruby to install.
+* `{os}` - the lowercase target operating system kernel as reported by `uname -s`. This may be overridden using the `RUBY_BINARY_INSTALL_OS` environment variable.
+* `{arch}` - the architecture of the target machine as reported by `uname -m`. This may be overridden using the `RUBY_BINARY_INSTALL_ARCH` environment variable.
+* `{distro}` - on Linux, the distribution name (`ID`) as detected by the [operating system identification standard](https://www.linux.org/docs/man5/os-release.html). This may be overridden using the `RUBY_BINARY_INSTALL_DISTRO` environment variable. On all other operating systems, this is `none`.
+* `{distro_version}` - on Linux, the distribution version (`VERSION_ID`) as detected by the [operating system identification standard](https://www.linux.org/docs/man5/os-release.html). This may be overridden using the `RUBY_BINARY_INSTALL_DISTRO_VERSION` environment variable. On all other operating systems, this is `none`.
+
+It is assumed that the binaries provided are distributed in tarballs. If there are extra `tar` flags needed to properly extract the tarball, you can provide them via the `RUBY_BINARY_INSTALL_TAR_ARGS` environment variable.
+
 ## Default gems
 
 asdf-ruby can automatically install a set of default gems right after
