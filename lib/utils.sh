@@ -183,8 +183,8 @@ render_custom_url() {
     load_os_release
   fi
   echo "$url_template" | sed \
-    -e "s:{distro}:$(get_linux_distro "$ID"):g" \
-    -e "s:{distro_version}:$(get_linux_distro_version "$VERSION_ID"):g" \
+    -e "s:{distro}:$(get_linux_distro "${ID:-}"):g" \
+    -e "s:{distro_version}:$(get_linux_distro_version "${VERSION_ID:-}"):g" \
     -e "s:{os}:$os:g" \
     -e "s:{arch}:$(get_arch):g" \
     -e "s:{ruby_version}:$ruby_version:g"
