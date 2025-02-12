@@ -71,7 +71,7 @@ install_ruby_binary() {
     url="$(render_custom_url "$binary_type" "$version")"
     base_url="$(dirname "$url")"
     filename="$(basename "$url")"
-    tar_args="$RUBY_BINARY_INSTALL_TAR_ARGS"
+    tar_args="${RUBY_BINARY_INSTALL_TAR_ARGS:-}"
     ;;
   esac
   download_and_install_prebuilt_ruby "$base_url" "$filename" "$install_path" "$tar_args"
