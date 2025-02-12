@@ -50,7 +50,9 @@ jobs:
       - name: Test plugin (custom)
         uses: asdf-vm/actions/plugin-test@v3
         env:
+          GH_TOKEN: ${{ github.token }}
           RUBY_BINARY_INSTALL: https://github.com/malept/ruby-builder/releases/download/binaries/ruby-{ruby_version}_{os}-{arch}_{distro}-{distro_version}.tar.xz
+          RUBY_BINARY_INSTALL_GITHUB_ATTESTATION: malept/ruby-builder
         with:
           command: ruby -v
           version: 3.1.6
@@ -62,6 +64,7 @@ jobs:
       - name: Test plugin (custom)
         uses: asdf-vm/actions/plugin-test@v3
         env:
+          GH_TOKEN: ${{ github.token }}
           RUBY_BINARY_INSTALL: https://github.com/malept/ruby-builder/releases/download/binaries/ruby-{ruby_version}_{os}-{arch}_{distro}-{distro_version}.tar.xz
           RUBY_BINARY_INSTALL_GITHUB_ATTESTATION: malept/ruby-builder
         with:
