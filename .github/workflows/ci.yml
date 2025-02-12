@@ -36,21 +36,21 @@ jobs:
       - name: Test plugin (travis)
         uses: asdf-vm/actions/plugin-test@v3
         env:
-          RUBY_INSTALL_BINARY: travis
+          RUBY_BINARY_INSTALL: travis
         with:
           command: ruby -v
           version: 3.3.5
       - name: Test plugin (rvm)
         uses: asdf-vm/actions/plugin-test@v3
         env:
-          RUBY_INSTALL_BINARY: rvm
+          RUBY_BINARY_INSTALL: rvm
         with:
           command: ruby -v
           version: 3.2.3
       - name: Test plugin (custom)
         uses: asdf-vm/actions/plugin-test@v3
         env:
-          RUBY_INSTALL_BINARY: https://github.com/malept/ruby-builder/releases/download/binaries/ruby-{ruby_version}_{os}-{arch}_{distro}-{distro_version}.tar.xz
+          RUBY_BINARY_INSTALL: https://github.com/malept/ruby-builder/releases/download/binaries/ruby-{ruby_version}_{os}-{arch}_{distro}-{distro_version}.tar.xz
         with:
           command: ruby -v
           version: 3.1.6
@@ -62,7 +62,7 @@ jobs:
       - name: Test plugin (custom)
         uses: asdf-vm/actions/plugin-test@v3
         env:
-          RUBY_INSTALL_BINARY: https://github.com/malept/ruby-builder/releases/download/binaries/ruby-{ruby_version}_{os}-{arch}_{distro}-{distro_version}.tar.xz
+          RUBY_BINARY_INSTALL: https://github.com/malept/ruby-builder/releases/download/binaries/ruby-{ruby_version}_{os}-{arch}_{distro}-{distro_version}.tar.xz
           RUBY_BINARY_INSTALL_GITHUB_ATTESTATION: malept/ruby-builder
         with:
           command: ruby -v
