@@ -63,6 +63,7 @@ jobs:
         uses: asdf-vm/actions/plugin-test@v3
         env:
           RUBY_INSTALL_BINARY: https://github.com/malept/ruby-builder/releases/download/binaries/ruby-{ruby_version}_{os}-{arch}_{distro}-{distro_version}.tar.xz
+          RUBY_BINARY_INSTALL_GITHUB_ATTESTATION: malept/ruby-builder
         with:
           command: ruby -v
           version: 3.2.6

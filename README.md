@@ -77,6 +77,8 @@ Installs a Ruby binary using the provided templated URL. Valid template values:
 
 It is assumed that the binaries provided are distributed in tarballs. If there are extra `tar` flags needed to properly extract the tarball, you can provide them via the `RUBY_BINARY_INSTALL_TAR_ARGS` environment variable.
 
+If `RUBY_BINARY_INSTALL_GITHUB_ATTESTATION` is set to the `owner/repo_name` where the binary tarball was created via GitHub Actions, `asdf-ruby` can verify that the tarball was not manually changed. It assumes that a recent version of [`gh`](https://cli.github.com/) is installed, which does the verification.
+
 ## Default gems
 
 asdf-ruby can automatically install a set of default gems right after
