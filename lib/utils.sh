@@ -212,7 +212,7 @@ download_and_install_prebuilt_ruby() {
   download_file="$(mktemp -d "${TMPDIR:-/tmp}/asdf-ruby.XXXXXX")/$filename"
 
   curl --fail --silent --show-error --location --output "$download_file" "$url"
-  if [[ -n "$RUBY_BINARY_INSTALL_GITHUB_ATTESTATION" ]]; then
+  if [[ -n "${RUBY_BINARY_INSTALL_GITHUB_ATTESTATION:-}" ]]; then
     if ! command -v gh >/dev/null; then
       errorexit "GitHub attestation verification requires the 'gh' tool installed and available via the PATH environment variable"
     fi
