@@ -87,7 +87,7 @@ load_os_release() {
 }
 
 get_os() {
-  local os="${RUBY_BINARY_INSTALL_OS:-}"
+  local os="${ASDF_RUBY_PRECOMPILED_OS:-}"
   if [[ -z $os ]]; then
     os="$(uname -s | awk '{print tolower($0)}')"
   fi
@@ -96,7 +96,7 @@ get_os() {
 }
 
 get_arch() {
-  local arch="${RUBY_BINARY_INSTALL_ARCH:-}"
+  local arch="${ASDF_RUBY_PRECOMPILED_ARCH:-}"
   if [[ -z $arch ]]; then
     arch="$(uname -m)"
   fi
@@ -105,7 +105,7 @@ get_arch() {
 }
 
 get_linux_distro() {
-  local distro="${RUBY_BINARY_INSTALL_DISTRO:-}"
+  local distro="${ASDF_RUBY_PRECOMPILED_DISTRO:-}"
   if [[ -z $distro ]]; then
     distro="${1:-none}"
   fi
@@ -114,7 +114,7 @@ get_linux_distro() {
 }
 
 get_linux_distro_version() {
-  local distro_version="${RUBY_BINARY_INSTALL_DISTRO_VERSION:-}"
+  local distro_version="${ASDF_RUBY_PRECOMPILED_DISTRO_VERSION:-}"
   if [[ -z $distro_version ]]; then
     distro_version="${1:-none}"
   fi
@@ -122,59 +122,8 @@ get_linux_distro_version() {
   echo "$distro_version"
 }
 
-get_rvm_io_linux_distro() {
-  local distro_slug distro_id
-
-  distro_id="$1"
-
-  if [[ -n "${RUBY_BINARY_INSTALL_DISTRO:-}" ]]; then
-    echo "$RUBY_BINARY_INSTALL_DISTRO"
-    return
-  fi
-
-  case "$distro_id" in
-  amzn) distro_slug="amazon" ;;
-  arch | centos | debian | opensuse | ubuntu) distro_slug="$distro_id" ;;
-  ol) distro_slug="oracle" ;;
-  "opensuse-leap") distro_slug="opensuse" ;;
-  *) errorexit "Unsupported Linux distro $NAME, install from source instead" ;;
-  esac
-
-  echo "$distro_slug"
-}
-
-get_rvm_io_base_url() {
-  local os
-  os="$(get_os)"
-  case "$os" in
-  darwin)
-    # There is an osx folder but the binaries haven't been built since 2015
-    errorexit "macOS not supported by rvm.io/binaries, install from source instead"
-    ;;
-
-  linux)
-    load_os_release
-    echo "https://rvm.io/binaries/$(get_rvm_io_linux_distro "$ID")/$(get_linux_distro_version "$VERSION_ID")/$(get_arch)"
-    ;;
-  *) errorexit "OS '$os' not supported by rvm.io/binaries, install from source instead" ;;
-  esac
-}
-
-get_travis_rubies_base_url() {
-  local distro
-  if [[ "$(get_os)" != "linux" ]]; then
-    errorexit "Non-Linux OSes currently unsupported, install from source instead"
-  fi
-  load_os_release
-  distro="$(get_linux_distro "$ID")"
-  if [[ "$distro" != "ubuntu" ]]; then
-    errorexit "Travis CI only provides Linux binaries for the Ubuntu distro"
-  fi
-  echo "https://s3.amazonaws.com/travis-rubies/binaries/$distro/$(get_linux_distro_version "$VERSION_ID")/$(get_arch)"
-}
-
 # Replace {...} placeholders with appropriate values
-render_custom_url() {
+generate_precompiled_url() {
   local url_template="$1"
   local ruby_version="$2"
   local os
@@ -202,22 +151,21 @@ run_gnu_tar() {
 
 download_and_install_prebuilt_ruby() {
   local base_url download_file filename install_path url
-  base_url="$1"
-  shift
-  filename="$1"
+  url="$1"
+  base_url="$(dirname "$url")"
+  filename="$(basename "$url")"
   shift
   install_path="$1"
   shift
-  url="$base_url/$filename"
   download_file="$(mktemp -d "${TMPDIR:-/tmp}/asdf-ruby.XXXXXX")/$filename"
 
   curl --fail --silent --show-error --location --output "$download_file" "$url"
-  if [[ -n "${RUBY_BINARY_INSTALL_GITHUB_ATTESTATION:-}" ]]; then
+  if [[ -n "${ASDF_RUBY_PRECOMPILED_GITHUB_ATTESTATION:-}" ]]; then
     if ! command -v gh >/dev/null; then
       errorexit "GitHub attestation verification requires the 'gh' tool installed and available via the PATH environment variable"
     fi
 
-    if ! gh attestation verify "$download_file" --repo "$RUBY_BINARY_INSTALL_GITHUB_ATTESTATION"; then
+    if ! gh attestation verify "$download_file" --repo "$ASDF_RUBY_PRECOMPILED_GITHUB_ATTESTATION"; then
       errorexit "Could not verify attestation for '$download_file'"
     fi
   fi
