@@ -76,3 +76,98 @@ ruby_build_source_dir() {
 ruby_build_path() {
   echo "$(ruby_build_dir)/bin/ruby-build"
 }
+
+load_os_release() {
+  local os_release
+
+  # Needed for both the distro ID and version ID
+  test -e /etc/os-release && os_release='/etc/os-release' || os_release='/usr/lib/os-release'
+  # shellcheck source=/dev/null
+  source "${os_release}"
+}
+
+get_os() {
+  local os="${ASDF_RUBY_PRECOMPILED_OS:-}"
+  if [[ -z $os ]]; then
+    os="$(uname -s | awk '{print tolower($0)}')"
+  fi
+
+  echo "$os"
+}
+
+get_arch() {
+  local arch="${ASDF_RUBY_PRECOMPILED_ARCH:-}"
+  if [[ -z $arch ]]; then
+    arch="$(uname -m)"
+  fi
+
+  echo "$arch"
+}
+
+get_linux_distro() {
+  local distro="${ASDF_RUBY_PRECOMPILED_DISTRO:-}"
+  if [[ -z $distro ]]; then
+    distro="${1:-none}"
+  fi
+
+  echo "$distro"
+}
+
+get_linux_distro_version() {
+  local distro_version="${ASDF_RUBY_PRECOMPILED_DISTRO_VERSION:-}"
+  if [[ -z $distro_version ]]; then
+    distro_version="${1:-none}"
+  fi
+
+  echo "$distro_version"
+}
+
+# Replace {...} placeholders with appropriate values
+generate_precompiled_url() {
+  local url_template="$1"
+  local ruby_version="$2"
+  local os
+  os="$(get_os)"
+  if [[ "$os" == "linux" ]]; then
+    load_os_release
+  fi
+  echo "$url_template" | sed \
+    -e "s:{distro}:$(get_linux_distro "${ID:-}"):g" \
+    -e "s:{distro_version}:$(get_linux_distro_version "${VERSION_ID:-}"):g" \
+    -e "s:{os}:$os:g" \
+    -e "s:{arch}:$(get_arch):g" \
+    -e "s:{ruby_version}:$ruby_version:g"
+}
+
+run_gnu_tar() {
+  local tar
+  case "$(get_os)" in
+  darwin) tar=gtar ;;
+  *) tar=tar ;;
+  esac
+
+  "$tar" "$@"
+}
+
+download_and_install_prebuilt_ruby() {
+  local download_file filename install_path url
+  url="$1"
+  filename="$(basename "$url")"
+  shift
+  install_path="$1"
+  shift
+  download_file="$(mktemp -d "${TMPDIR:-/tmp}/asdf-ruby.XXXXXX")/$filename"
+
+  curl --fail --silent --show-error --location --output "$download_file" "$url"
+  if [[ -n "${ASDF_RUBY_PRECOMPILED_GITHUB_ATTESTATION:-}" ]]; then
+    if ! command -v gh >/dev/null; then
+      errorexit "GitHub attestation verification requires the 'gh' tool installed and available via the PATH environment variable"
+    fi
+
+    if ! gh attestation verify "$download_file" --repo "$ASDF_RUBY_PRECOMPILED_GITHUB_ATTESTATION"; then
+      errorexit "Could not verify attestation for '$download_file'"
+    fi
+  fi
+  mkdir -p "$install_path"
+  run_gnu_tar --extract --file="$download_file" --directory="$install_path" --preserve-permissions "$@"
+}

@@ -10,7 +10,7 @@ Ruby plugin for [asdf](https://github.com/asdf-vm/asdf) version manager
 asdf plugin add ruby https://github.com/asdf-vm/asdf-ruby.git
 ```
 
-Please make sure you have the required [system dependencies](https://github.com/rbenv/ruby-build/wiki#suggested-build-environment) installed before trying to install Ruby. It is also recommended that you [remove other ruby version managers before using asdf-ruby](#troubleshooting)
+Please make sure you have the required [system dependencies](https://github.com/rbenv/ruby-build/wiki#suggested-build-environment) installed before trying to install Ruby from source. It is also recommended that you [remove other ruby version managers before using asdf-ruby](#troubleshooting)
 
 ## Use
 
@@ -35,6 +35,37 @@ By default asdf-ruby uses a recent release of ruby-build, however instead you ca
 ```
 ASDF_RUBY_BUILD_VERSION=master asdf install ruby 2.6.4
 ```
+
+### Precompiled distributions
+
+If `ASDF_RUBY_PRECOMPILED_URL` is set, `asdf-ruby` will install a precompiled distribution of CRuby from the specified templated URL.
+
+#### Dependencies
+
+The following extra tools are required for this functionality:
+
+* `uname`
+* GNU tar
+
+On macOS, GNU tar can be installed via Homebrew:
+
+```shell
+brew install gnu-tar
+```
+
+#### URL template variables
+
+Valid template values:
+
+* `{ruby_version}` - the version of Ruby to install.
+* `{os}` - the lowercase target operating system kernel as reported by `uname -s`. This may be overridden using the `ASDF_RUBY_PRECOMPILED_OS` environment variable.
+* `{arch}` - the architecture of the target machine as reported by `uname -m`. This may be overridden using the `ASDF_RUBY_PRECOMPILED_ARCH` environment variable.
+* `{distro}` - on Linux, the distribution name (`ID`) as detected by the [operating system identification standard](https://www.linux.org/docs/man5/os-release.html). This may be overridden using the `ASDF_RUBY_PRECOMPILED_DISTRO` environment variable. On all other operating systems, this is `none`.
+* `{distro_version}` - on Linux, the distribution version (`VERSION_ID`) as detected by the [operating system identification standard](https://www.linux.org/docs/man5/os-release.html). This may be overridden using the `ASDF_RUBY_PRECOMPILED_DISTRO_VERSION` environment variable. On all other operating systems, this is `none`.
+
+It is assumed that the binaries provided are distributed in tarballs. If there are extra `tar` flags needed to properly extract the tarball, you can provide them via the `ASDF_RUBY_PRECOMPILED_TAR_ARGS` environment variable.
+
+If `ASDF_RUBY_PRECOMPILED_GITHUB_ATTESTATION` is set to the `owner/repo_name` where the binary tarball was created and attested via GitHub Actions, `asdf-ruby` can verify that the tarball was not manually changed. It assumes that a recent version of [`gh`](https://cli.github.com/) is installed, which does the verification.
 
 ## Default gems
 
