@@ -150,9 +150,8 @@ run_gnu_tar() {
 }
 
 download_and_install_prebuilt_ruby() {
-  local base_url download_file filename install_path url
+  local download_file filename install_path url
   url="$1"
-  base_url="$(dirname "$url")"
   filename="$(basename "$url")"
   shift
   install_path="$1"
