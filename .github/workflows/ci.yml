@@ -73,7 +73,7 @@ jobs:
           ASDF_RUBY_PRECOMPILED_TAR_ARGS: --strip-components=2
         with:
           command: ruby -v
-          version: 3.2.6
+          version: 3.3.7
 
   lint:
     runs-on: ubuntu-latest
