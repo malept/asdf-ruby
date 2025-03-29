@@ -69,7 +69,7 @@ jobs:
         uses: asdf-vm/actions/plugin-test@v3
         env:
           GH_TOKEN: ${{ github.token }}
-          ASDF_RUBY_PRECOMPILED_URL: https://github.com/Homebrew/homebrew-portable-ruby/releases/download/{ruby_version}/portable-ruby-{ruby_version}.arm64_bigsur.bottle.tar.gz
+          ASDF_RUBY_PRECOMPILED_URL: https://github.com/Homebrew/homebrew-portable-ruby/releases/download/{ruby_version}/portable-ruby-{ruby_version}.{arch}_big_sur.bottle.tar.gz
           ASDF_RUBY_PRECOMPILED_TAR_ARGS: --strip-components=2
         with:
           command: ruby -v
