@@ -28,7 +28,7 @@ jobs:
         uses: asdf-vm/actions/plugin-test@v3
         with:
           command: ruby -v
-  test-binary-linux:
+  test-precompiled-linux:
     needs: [lint]
     runs-on: ubuntu-24.04
     steps:
@@ -42,7 +42,16 @@ jobs:
         with:
           command: ruby -v
           version: 3.1.6
-  test-binary-macos:
+      - name: Test plugin (Homebrew/portable-ruby)
+        uses: asdf-vm/actions/plugin-test@v3
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ASDF_RUBY_PRECOMPILED_URL: https://github.com/Homebrew/homebrew-portable-ruby/releases/download/{version}/portable-ruby-{version}.{arch}_{os}.bottle.tar.gz
+          ASDF_RUBY_PRECOMPILED_TAR_ARGS: --strip-components=2
+        with:
+          command: ruby -v
+          version: 3.3.7
+  test-precompiled-macos:
     needs: [lint]
     runs-on: macOS-latest
     steps:
@@ -53,6 +62,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           ASDF_RUBY_PRECOMPILED_URL: https://github.com/malept/ruby-builder/releases/download/binaries/ruby-{ruby_version}_{os}-{arch}_{distro}-{distro_version}.tar.xz
           ASDF_RUBY_PRECOMPILED_GITHUB_ATTESTATION: malept/ruby-builder
+        with:
+          command: ruby -v
+          version: 3.2.6
+      - name: Test plugin (Homebrew/portable-ruby)
+        uses: asdf-vm/actions/plugin-test@v3
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ASDF_RUBY_PRECOMPILED_URL: https://github.com/Homebrew/homebrew-portable-ruby/releases/download/{version}/portable-ruby-{version}.arm64_bigsur.bottle.tar.gz
+          ASDF_RUBY_PRECOMPILED_TAR_ARGS: --strip-components=2
         with:
           command: ruby -v
           version: 3.2.6
