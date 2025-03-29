@@ -16,6 +16,9 @@ install_ruby() {
     local url
     url="$(generate_precompiled_url "$url_template" "$version")"
     download_and_install_prebuilt_ruby "$url" "$install_path" "$tar_args"
+    echoerr "****"
+    echoerr "URL: $url"
+    echoerr "****"
     return
   fi
 
