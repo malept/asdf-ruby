@@ -55,7 +55,7 @@ brew install gnu-tar
 
 #### URL template variables
 
-Installs a Ruby binary using the provided templated URL. Valid template values:
+Valid template values:
 
 * `{ruby_version}` - the version of Ruby to install.
 * `{os}` - the lowercase target operating system kernel as reported by `uname -s`. This may be overridden using the `ASDF_RUBY_PRECOMPILED_OS` environment variable.
