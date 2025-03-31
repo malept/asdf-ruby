@@ -36,9 +36,9 @@ By default asdf-ruby uses a recent release of ruby-build, however instead you ca
 ASDF_RUBY_BUILD_VERSION=master asdf install ruby 2.6.4
 ```
 
-### Installing binaries
+### Precompiled distributions
 
-If `ASDF_RUBY_PRECOMPILED_URL` is set, `asdf-ruby` will install a binary distribution of CRuby from the specified templated URL.
+If `ASDF_RUBY_PRECOMPILED_URL` is set, `asdf-ruby` will install a precompiled distribution of CRuby from the specified templated URL.
 
 #### Dependencies
 
